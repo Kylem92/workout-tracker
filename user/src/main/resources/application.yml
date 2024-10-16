@@ -1,0 +1,24 @@
+server:
+ port: 3000
+info:
+ app:
+  name: UserService
+  description: CRUD operations for user content
+  maintained-by: kyle
+    
+---
+
+spring:
+ config:
+  activate:
+   on-profile: local
+ data:
+  mongodb:
+   uri: mongodb://localhost:27017/gymdb
+  
+---
+
+spring:
+ config:
+  activate:
+   on-profile: test
