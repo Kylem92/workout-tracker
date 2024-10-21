@@ -1,10 +1,10 @@
-//package com.kyle.user.enums;
-//
-//
-//public enum Status {
-//
-//  ACTIVE,
-//  INACTIVE,
-//  REMOVED;
-//
-//}
+package com.kyle.user.enums;
+
+
+public enum Status {
+
+  ACTIVE,
+  INACTIVE,
+  REMOVED;
+
+}
