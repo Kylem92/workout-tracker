@@ -78,7 +78,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/create", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<User> saveUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@RequestBody User user) {
 	try {
 	    return ResponseHelper.getResponseEntityOK(userService.saveUser(user));
 	} catch (UserCrudException e) {
@@ -105,7 +105,7 @@ public class UserController {
 	}
     }
 
-    @PutMapping(value = "/deletebyid/{userId}", produces = "application/json", consumes = "application/json")
+    @PutMapping(value = "/deletebyid/{userId}", produces = "application/json")
     public ResponseEntity<User> deleteUser(@PathVariable String userId) {
 	try {
 	    return ResponseHelper.getResponseEntityOK(userService.deleteUser(userId));

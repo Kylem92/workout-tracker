@@ -4,24 +4,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,14 +33,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.kyle.user.exceptions.UserCrudException;
 import com.kyle.user.model.User;
 import com.kyle.user.service.UserService;
+import com.kyle.user.testutils.TestUtils;
 
-@ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @ContextConfiguration(classes = UserController.class)
-public class UserControllerTests {
+class UserControllerTests {
 
     @Autowired
     UserController userController;
@@ -48,14 +51,17 @@ public class UserControllerTests {
 
     private MockMvc mockMvc;
 
-    private ObjectMapper mapper;
+    private static ObjectMapper mapper;
+
+    @BeforeAll
+    public static void beforeAllTests() {
+	mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    }
 
     @BeforeEach
-    public void setupTest() {
+    public void beforeEachTest() {
 	// prepare test
 	mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
-	mapper = new ObjectMapper();
-	mapper.registerModule(new JavaTimeModule());
     }
 
     @Test
@@ -66,7 +72,7 @@ public class UserControllerTests {
     @Test
     void testGetAllUsers_MVC_get() throws Exception {
 	// given
-	List<User> users = createUsers(3);
+	List<User> users = TestUtils.createUsers(3);
 	when(userService.getAllUsers()).thenReturn(users);
 	// when
 	MvcResult actual = mockMvc.perform(get("/user/getall").accept("application/json")).andExpect(status().isOk())
@@ -113,7 +119,7 @@ public class UserControllerTests {
     @Test
     void testGetUserById_MVC_get() throws Exception {
 	// given
-	User user = createUser("userId", "", "");
+	User user = TestUtils.createUser("userId", "", "");
 	String id = "userId";
 	when(userService.findById(id)).thenReturn(Optional.of(user));
 	// when
@@ -156,7 +162,7 @@ public class UserControllerTests {
     @Test
     void testGetUserByUsername_MVC_get() throws Exception {
 	// given
-	User user = createUser("userId", "username", "");
+	User user = TestUtils.createUser("userId", "username", "");
 	String username = "username";
 	when(userService.findByUsername(username)).thenReturn(Optional.of(user));
 	// when
@@ -203,7 +209,7 @@ public class UserControllerTests {
 	// given
 	String username = "username";
 	String password = "password";
-	User user = createUser("userId", "username", "password");
+	User user = TestUtils.createUser("userId", "username", "password");
 	when(userService.findByUsernameAndPassword(username, password)).thenReturn(Optional.of(user));
 	// when
 	MvcResult actual = mockMvc
@@ -219,21 +225,174 @@ public class UserControllerTests {
 	assertEquals(user.getPassword(), actualUser.getPassword());
     }
 
-    public static List<User> createUsers(int i) {
-	List<User> users = new ArrayList<>();
-	for (int j = 1; j <= i; j++) {
-	    User user = createUser(String.valueOf(j), "username", "password");
-	    users.add(user);
-	}
-	return users;
+    @Test
+    void testGetUserByUsernameAndPassword_MVC_get_not_found() throws Exception {
+	// given
+	// when
+	MvcResult actual = mockMvc
+		.perform(get("/user/getbyusernameandpassword/username/password").accept("application/json"))
+		.andExpect(status().isNotFound()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	verify(userService).findByUsernameAndPassword(anyString(), anyString());
+	assertThat(contentAsString).isBlank();
     }
 
-    public static User createUser(String userId, String username, String password) {
-	User user = new User();
-	user.setUserId(userId);
-	user.setUsername(username);
-	user.setPassword(password);
-	user.setDateCreated(LocalDate.now());
-	return user;
+    @Test
+    void testGetUserByUsernameAndPassword_MVC_get_failure() throws Exception {
+	// given
+	String username = "username";
+	String password = "password";
+	when(userService.findByUsernameAndPassword(username, password))
+		.thenThrow(new RuntimeException("TEST_EXCEPTION"));
+	// when
+	MvcResult actual = mockMvc
+		.perform(get("/user/getbyusernameandpassword/username/password").accept("application/json"))
+		.andExpect(status().isInternalServerError()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	verify(userService).findByUsernameAndPassword(username, password);
+	assertThat(contentAsString).isBlank();
     }
+
+    @Test
+    void testCreateUser_MVC_post() throws Exception {
+	// given
+	User user = TestUtils.createUser("userId", "username", "password");
+	when(userService.saveUser(user)).thenReturn(user);
+	// when
+	MvcResult actual = mockMvc.perform(post("/user/create").content(mapper.writeValueAsString(user))
+		.contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	User actualUser = mapper.readValue(contentAsString, User.class);
+	assertEquals(user, actualUser);
+	verify(userService).saveUser(user);
+
+    }
+
+    @Test
+    void testCreateUser_MVC_post_username_already_exists() throws Exception {
+	// given
+	User user = TestUtils.createUser("userId", "username", "password");
+	when(userService.saveUser(user)).thenThrow(new UserCrudException("TEST_EXCEPTION", HttpStatus.FORBIDDEN));
+	// when
+	MvcResult actual = mockMvc.perform(post("/user/create").content(mapper.writeValueAsString(user))
+		.contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isForbidden()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	User actualUser = mapper.readValue(contentAsString, User.class);
+	assertEquals("TEST_EXCEPTION", actualUser.getErrorsAndWarnings().get(0));
+	verify(userService).saveUser(any());
+    }
+
+    @Test
+    void testCreateUser_MVC_post_failure() throws Exception {
+	// given
+	User user = TestUtils.createUser("userId", "username", "password");
+	when(userService.saveUser(user)).thenThrow(new RuntimeException("TEST_EXCEPTION"));
+	// when
+	MvcResult actual = mockMvc
+		.perform(post("/user/create").content(mapper.writeValueAsString(user))
+			.contentType(MediaType.APPLICATION_JSON_VALUE))
+		.andExpect(status().isInternalServerError()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	assertThat(contentAsString).isBlank();
+	verify(userService).saveUser(user);
+    }
+
+    @Test
+    void testUpdateUser_MVC_post() throws Exception {
+	// given
+	User user = TestUtils.createUser("userId", "username", "password");
+	when(userService.updateUser(user)).thenReturn(user);
+	// when
+	MvcResult actual = mockMvc.perform(put("/user/update").content(mapper.writeValueAsString(user))
+		.contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	User actualUser = mapper.readValue(contentAsString, User.class);
+	assertEquals(user, actualUser);
+	verify(userService).updateUser(user);
+
+    }
+
+    @Test
+    void testUpdateUser_MVC_post_username_already_exists() throws Exception {
+	// given
+	User user = TestUtils.createUser("userId", "username", "password");
+	when(userService.updateUser(user)).thenThrow(new UserCrudException("TEST_EXCEPTION", HttpStatus.FORBIDDEN));
+	// when
+	MvcResult actual = mockMvc.perform(put("/user/update").content(mapper.writeValueAsString(user))
+		.contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isForbidden()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	User actualUser = mapper.readValue(contentAsString, User.class);
+	assertEquals("TEST_EXCEPTION", actualUser.getErrorsAndWarnings().get(0));
+	verify(userService).updateUser(any());
+    }
+
+    @Test
+    void testUpdateUser_MVC_post_failure() throws Exception {
+	// given
+	User user = TestUtils.createUser("userId", "username", "password");
+	when(userService.updateUser(user)).thenThrow(new RuntimeException("TEST_EXCEPTION"));
+	// when
+	MvcResult actual = mockMvc
+		.perform(put("/user/update").content(mapper.writeValueAsString(user))
+			.contentType(MediaType.APPLICATION_JSON_VALUE))
+		.andExpect(status().isInternalServerError()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	assertThat(contentAsString).isBlank();
+	verify(userService).updateUser(user);
+    }
+
+    @Test
+    void testDeleteUserById_MVC_get() throws Exception {
+	// given
+	User user = TestUtils.createUser("userId", "", "");
+	String id = "userId";
+	when(userService.deleteUser(id)).thenReturn(user);
+	// when
+	MvcResult actual = mockMvc.perform(put("/user/deletebyid/userId").accept("application/json"))
+		.andExpect(status().isOk()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	User actualUser = mapper.readValue(contentAsString, User.class);
+	verify(userService).deleteUser(id);
+	assertNotNull(contentAsString);
+	assertEquals(user.getUserId(), actualUser.getUserId());
+    }
+
+    @Test
+    void testDeleteUserById_MVC_get_not_found() throws Exception {
+	// given
+	when(userService.deleteUser(anyString()))
+		.thenThrow(new UserCrudException("TEST_EXCEPTION", HttpStatus.FORBIDDEN));
+	// when
+	MvcResult actual = mockMvc.perform(put("/user/deletebyid/userId").accept("application/json"))
+		.andExpect(status().isForbidden()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	User actualUser = mapper.readValue(contentAsString, User.class);
+	assertEquals("TEST_EXCEPTION", actualUser.getErrorsAndWarnings().get(0));
+	verify(userService).deleteUser(anyString());
+    }
+
+    @Test
+    void testDeleteUserById_MVC_get_failure() throws Exception {
+	// given
+	String id = "userId";
+	when(userService.deleteUser(id)).thenThrow(new RuntimeException("TEST_EXCEPTION"));
+	// when
+	MvcResult actual = mockMvc.perform(put("/user/deletebyid/userId").accept("application/json"))
+		.andExpect(status().isInternalServerError()).andReturn();
+	// then
+	String contentAsString = actual.getResponse().getContentAsString();
+	verify(userService).deleteUser(id);
+	assertThat(contentAsString).isBlank();
+    }
+
 }

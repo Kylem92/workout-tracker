@@ -53,7 +53,6 @@ public class UserService {
 	} else {
 	    throw new UserCrudException("User with username: " + user.getUsername() + " already exists!");
 	}
-
     }
 
     private String hashValue(String value) {
