@@ -1,4 +1,4 @@
-package com.kyle.user.utils;
+package com.kyle.commonutils;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

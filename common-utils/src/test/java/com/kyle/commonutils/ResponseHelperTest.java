@@ -1,4 +1,4 @@
-package com.kyle.user.utils;
+package com.kyle.commonutils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

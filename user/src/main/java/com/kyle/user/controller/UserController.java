@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kyle.commonutils.ResponseHelper;
 import com.kyle.user.exceptions.UserCrudException;
 import com.kyle.user.model.User;
 import com.kyle.user.service.UserService;
-import com.kyle.user.utils.ResponseHelper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,6 +80,7 @@ public class UserController {
     @PostMapping(value = "/create", produces = "application/json", consumes = "application/json")
     public ResponseEntity<User> createUser(@RequestBody User user) {
 	try {
+	    log.info("Creating user with username: {}", user.getUsername());
 	    return ResponseHelper.getResponseEntityOK(userService.saveUser(user));
 	} catch (UserCrudException e) {
 	    log.error(e.getMessage());
@@ -94,6 +95,7 @@ public class UserController {
     @PutMapping(value = "/update", produces = "application/json", consumes = "application/json")
     public ResponseEntity<User> updateUser(@RequestBody User user) {
 	try {
+	    log.info("Updating user with userId: {}", user.getUserId());
 	    return ResponseHelper.getResponseEntityOK(userService.updateUser(user));
 	} catch (UserCrudException e) {
 	    log.error(e.getMessage());
@@ -108,6 +110,7 @@ public class UserController {
     @PutMapping(value = "/deletebyid/{userId}", produces = "application/json")
     public ResponseEntity<User> deleteUser(@PathVariable String userId) {
 	try {
+	    log.info("Deleting user with userId: {}", userId);
 	    return ResponseHelper.getResponseEntityOK(userService.deleteUser(userId));
 	} catch (UserCrudException e) {
 	    log.error(e.getMessage());
