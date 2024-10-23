@@ -24,7 +24,7 @@ import com.kyle.user.enums.Status;
 import com.kyle.user.exceptions.UserCrudException;
 import com.kyle.user.model.User;
 import com.kyle.user.repository.UserRepository;
-import com.kyle.user.testutils.TestUtils;
+import com.kyle.user.testhelper.TestHelper;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -50,7 +50,7 @@ class UserServiceTest {
     @Test
     void testGetall() {
 	// given
-	List<User> users = TestUtils.createUsers(3);
+	List<User> users = TestHelper.createUsers(3);
 	when(userRepo.findAll()).thenReturn(users);
 	// when
 	List<User> actualUsers = userService.getAllUsers();
@@ -62,7 +62,7 @@ class UserServiceTest {
     void testFindById() {
 	// given
 	String id = "test";
-	User user = TestUtils.createUser("test", "username", "password");
+	User user = TestHelper.createUser("test", "username", "password");
 	when(userRepo.findOneByUserId(id)).thenReturn(Optional.of(user));
 	// when
 	Optional<User> actual = userService.findById(id);
@@ -86,7 +86,7 @@ class UserServiceTest {
     void testFindByUsername() {
 	// given
 	String username = "username";
-	User user = TestUtils.createUser("test", "username", "password");
+	User user = TestHelper.createUser("test", "username", "password");
 	when(userRepo.findOneByUsername(username)).thenReturn(Optional.of(user));
 	// when
 	Optional<User> actual = userService.findByUsername(username);
@@ -111,7 +111,7 @@ class UserServiceTest {
 	// given
 	String username = "username";
 	String password = "password";
-	User user = TestUtils.createUser("test", "username", "password");
+	User user = TestHelper.createUser("test", "username", "password");
 	when(userRepo.findOneByUsernameAndPassword(username, password)).thenReturn(Optional.of(user));
 	// when
 	Optional<User> actual = userService.findByUsernameAndPassword(username, password);
@@ -135,7 +135,7 @@ class UserServiceTest {
     @Test
     void testSaveUser() {
 	// given
-	User user = TestUtils.createUser("test", "username", "password");
+	User user = TestHelper.createUser("test", "username", "password");
 	when(userRepo.save(user)).thenReturn(user);
 	// when
 	User actual = userService.saveUser(user);
@@ -149,7 +149,7 @@ class UserServiceTest {
     @Test
     void testSaveUser_already_exists() {
 	// given
-	User user = TestUtils.createUser("test", "username", "password");
+	User user = TestHelper.createUser("test", "username", "password");
 	when(userRepo.findOneByUsername("username")).thenReturn(Optional.of(user));
 	// when
 	UserCrudException actual = assertThrows(UserCrudException.class, () -> userService.saveUser(user));
@@ -163,7 +163,7 @@ class UserServiceTest {
     void testUpdateUser() {
 	// given
 	String id = "test";
-	User user = TestUtils.createUser("test", "username", "password");
+	User user = TestHelper.createUser("test", "username", "password");
 	when(userRepo.findOneByUserId(id)).thenReturn(Optional.of(user));
 	when(userRepo.save(user)).thenReturn(user);
 	// when
@@ -179,7 +179,7 @@ class UserServiceTest {
     void testUpdateUser_doesnt_exist() {
 	// given
 	String id = "test";
-	User user = TestUtils.createUser("test", "username", "password");
+	User user = TestHelper.createUser("test", "username", "password");
 	when(userRepo.findOneByUserId(id)).thenReturn(Optional.empty());
 	// when
 	UserCrudException actual = assertThrows(UserCrudException.class, () -> userService.updateUser(user));
@@ -193,7 +193,7 @@ class UserServiceTest {
     void testDeleteUser() {
 	// given
 	String id = "test";
-	User user = TestUtils.createUser("test", "username", "password");
+	User user = TestHelper.createUser("test", "username", "password");
 	user.setStatus(Status.ACTIVE);
 	when(userRepo.findOneByUserId(id)).thenReturn(Optional.of(user));
 	when(userRepo.save(user)).thenReturn(user);
@@ -211,7 +211,7 @@ class UserServiceTest {
     void testDeleteUser_doesnt_exist() {
 	// given
 	String id = "test";
-	User user = TestUtils.createUser("test", "username", "password");
+	User user = TestHelper.createUser("test", "username", "password");
 	user.setStatus(Status.ACTIVE);
 	when(userRepo.findOneByUserId(id)).thenReturn(Optional.empty());
 	// when

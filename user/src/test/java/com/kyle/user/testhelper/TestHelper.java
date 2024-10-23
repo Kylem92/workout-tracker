@@ -1,4 +1,4 @@
-package com.kyle.user.testutils;
+package com.kyle.user.testhelper;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.kyle.user.model.User;
 
-public class TestUtils {
+public class TestHelper {
 
     public static List<User> createUsers(int i) {
 	List<User> users = new ArrayList<>();

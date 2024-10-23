@@ -36,7 +36,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.kyle.user.exceptions.UserCrudException;
 import com.kyle.user.model.User;
 import com.kyle.user.service.UserService;
-import com.kyle.user.testutils.TestUtils;
+import com.kyle.user.testhelper.TestHelper;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -72,7 +72,7 @@ class UserControllerTests {
     @Test
     void testGetAllUsers_MVC_get() throws Exception {
 	// given
-	List<User> users = TestUtils.createUsers(3);
+	List<User> users = TestHelper.createUsers(3);
 	when(userService.getAllUsers()).thenReturn(users);
 	// when
 	MvcResult actual = mockMvc.perform(get("/user/getall").accept("application/json")).andExpect(status().isOk())
@@ -119,7 +119,7 @@ class UserControllerTests {
     @Test
     void testGetUserById_MVC_get() throws Exception {
 	// given
-	User user = TestUtils.createUser("userId", "", "");
+	User user = TestHelper.createUser("userId", "", "");
 	String id = "userId";
 	when(userService.findById(id)).thenReturn(Optional.of(user));
 	// when
@@ -162,7 +162,7 @@ class UserControllerTests {
     @Test
     void testGetUserByUsername_MVC_get() throws Exception {
 	// given
-	User user = TestUtils.createUser("userId", "username", "");
+	User user = TestHelper.createUser("userId", "username", "");
 	String username = "username";
 	when(userService.findByUsername(username)).thenReturn(Optional.of(user));
 	// when
@@ -209,7 +209,7 @@ class UserControllerTests {
 	// given
 	String username = "username";
 	String password = "password";
-	User user = TestUtils.createUser("userId", "username", "password");
+	User user = TestHelper.createUser("userId", "username", "password");
 	when(userService.findByUsernameAndPassword(username, password)).thenReturn(Optional.of(user));
 	// when
 	MvcResult actual = mockMvc
@@ -258,7 +258,7 @@ class UserControllerTests {
     @Test
     void testCreateUser_MVC_post() throws Exception {
 	// given
-	User user = TestUtils.createUser("userId", "username", "password");
+	User user = TestHelper.createUser("userId", "username", "password");
 	when(userService.saveUser(user)).thenReturn(user);
 	// when
 	MvcResult actual = mockMvc.perform(post("/user/create").content(mapper.writeValueAsString(user))
@@ -274,7 +274,7 @@ class UserControllerTests {
     @Test
     void testCreateUser_MVC_post_username_already_exists() throws Exception {
 	// given
-	User user = TestUtils.createUser("userId", "username", "password");
+	User user = TestHelper.createUser("userId", "username", "password");
 	when(userService.saveUser(user)).thenThrow(new UserCrudException("TEST_EXCEPTION", HttpStatus.FORBIDDEN));
 	// when
 	MvcResult actual = mockMvc.perform(post("/user/create").content(mapper.writeValueAsString(user))
@@ -289,7 +289,7 @@ class UserControllerTests {
     @Test
     void testCreateUser_MVC_post_failure() throws Exception {
 	// given
-	User user = TestUtils.createUser("userId", "username", "password");
+	User user = TestHelper.createUser("userId", "username", "password");
 	when(userService.saveUser(user)).thenThrow(new RuntimeException("TEST_EXCEPTION"));
 	// when
 	MvcResult actual = mockMvc
@@ -305,7 +305,7 @@ class UserControllerTests {
     @Test
     void testUpdateUser_MVC_post() throws Exception {
 	// given
-	User user = TestUtils.createUser("userId", "username", "password");
+	User user = TestHelper.createUser("userId", "username", "password");
 	when(userService.updateUser(user)).thenReturn(user);
 	// when
 	MvcResult actual = mockMvc.perform(put("/user/update").content(mapper.writeValueAsString(user))
@@ -321,7 +321,7 @@ class UserControllerTests {
     @Test
     void testUpdateUser_MVC_post_username_already_exists() throws Exception {
 	// given
-	User user = TestUtils.createUser("userId", "username", "password");
+	User user = TestHelper.createUser("userId", "username", "password");
 	when(userService.updateUser(user)).thenThrow(new UserCrudException("TEST_EXCEPTION", HttpStatus.FORBIDDEN));
 	// when
 	MvcResult actual = mockMvc.perform(put("/user/update").content(mapper.writeValueAsString(user))
@@ -336,7 +336,7 @@ class UserControllerTests {
     @Test
     void testUpdateUser_MVC_post_failure() throws Exception {
 	// given
-	User user = TestUtils.createUser("userId", "username", "password");
+	User user = TestHelper.createUser("userId", "username", "password");
 	when(userService.updateUser(user)).thenThrow(new RuntimeException("TEST_EXCEPTION"));
 	// when
 	MvcResult actual = mockMvc
@@ -352,7 +352,7 @@ class UserControllerTests {
     @Test
     void testDeleteUserById_MVC_get() throws Exception {
 	// given
-	User user = TestUtils.createUser("userId", "", "");
+	User user = TestHelper.createUser("userId", "", "");
 	String id = "userId";
 	when(userService.deleteUser(id)).thenReturn(user);
 	// when

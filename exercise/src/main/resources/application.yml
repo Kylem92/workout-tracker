@@ -1,0 +1,24 @@
+server:
+ port: 3002
+info:
+ app:
+  name: exerciseService
+  description: CRUD operations for exercise content
+  maintained-by: kyle
+    
+---
+
+spring:
+ config:
+  activate:
+   on-profile: local
+ data:
+  mongodb:
+   uri: mongodb://localhost:27017/gymdb
+  
+---
+
+spring:
+ config:
+  activate:
+   on-profile: test
