@@ -6,7 +6,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.kyle.commonutils.StringUtilsHelper;
+import com.kyle.commonutils.CustomStringUtils;
+import com.kyle.commonutils.JsonUtils;
 import com.kyle.workoutmanager.enums.Status;
 import com.kyle.workoutmanager.exceptions.WorkoutCrudException;
 import com.kyle.workoutmanager.model.Workout;
@@ -32,17 +33,17 @@ public class WorkoutService {
     }
 
     public Workout saveWorkout(Workout workout) {
-	workout.setWorkoutId(StringUtilsHelper.generateUuid(12));
+	workout.setWorkoutId(CustomStringUtils.generateUuid(12));
 	workout.setDateCreated(LocalDate.now());
 	workout.setStatus(Status.ACTIVE);
-	kafkaProducer.sendMessage(StringUtilsHelper.objectToJSON(workout, false));
+	kafkaProducer.sendMessage(JsonUtils.objectToJSON(workout, false));
 	return workoutRepository.save(workout);
     }
 
     public Workout updateWorkout(Workout workout) {
 	Optional<Workout> existing = workoutRepository.findOneByWorkoutId(workout.getWorkoutId());
 	if (existing.isPresent()) {
-	    kafkaProducer.sendMessage(StringUtilsHelper.objectToJSON(workout, false));
+	    kafkaProducer.sendMessage(JsonUtils.objectToJSON(workout, false));
 	    return workoutRepository.save(workout);
 	} else {
 	    throw new WorkoutCrudException("Workout with id: " + workout.getWorkoutId() + " does not exist!");

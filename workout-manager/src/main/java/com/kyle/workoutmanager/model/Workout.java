@@ -10,11 +10,11 @@ import lombok.Data;
 @Data
 public class Workout {
 
-	private String workoutId;
-	private String userId;
-	private List<Exercise> exercises;
-	private WorkoutTemplate workoutTemplate;
-	private LocalDate dateCreated;
-	private List<String> errorsAndWarnings;
-	private Status status;
+    private String workoutId;
+    private String userId;
+    private List<Exercise> exercises;
+    private WorkoutTemplate workoutTemplate;
+    private LocalDate dateCreated;
+    private List<String> errorsAndWarnings;
+    private Status status;
 }
