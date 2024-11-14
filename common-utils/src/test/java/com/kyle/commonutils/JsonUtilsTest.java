@@ -1,7 +1,10 @@
 package com.kyle.commonutils;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.io.IOException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -9,56 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.kyle.commonutils.testhelper.DummyClass;
 
-class StringUtilsHelperTest {
-
-    @Test
-    void testHashValueIfNeeded_null() {
-	// given
-	String value = null;
-	// when
-	String actual = StringUtilsHelper.hashValueIfNeeded(value);
-	// then
-	assertThat(actual).isBlank();
-    }
-
-    @Test
-    void testHashValueIfNeeded_blank() {
-	// given
-	String value = "";
-	// when
-	String actual = StringUtilsHelper.hashValueIfNeeded(value);
-	// then
-	assertThat(actual).isBlank();
-    }
-
-    @Test
-    void testHashValueIfNeeded_unhashed() {
-	// given
-	String value = "dev@arvoia.com";
-	// when
-	String actual = StringUtilsHelper.hashValueIfNeeded(value);
-	// then
-	assertThat(actual).isEqualTo("618f42138ef241e50ae50f9f8d6b9a68f84921cd5203148d9e200503b8935776");
-    }
-
-    @Test
-    void testHashValueIfNeeded_hashed() {
-	// given
-	String value = "618f42138ef241e50ae50f9f8d6b9a68f84921cd5203148d9e200503b8935776";
-	// when
-	String actual = StringUtilsHelper.hashValueIfNeeded(value);
-	// then
-	assertThat(actual).isEqualTo("618f42138ef241e50ae50f9f8d6b9a68f84921cd5203148d9e200503b8935776");
-    }
-
-    @Test
-    void testRandomUuidChars() {
-	// given
-	// when
-	String actual = StringUtilsHelper.generateUuid(12);
-	// then
-	assertThat(actual).hasSize(12);
-    }
+class JsonUtilsTest {
 
     @Test
     void testObjectToJSON_JSONObject() {
@@ -66,7 +20,7 @@ class StringUtilsHelperTest {
 	JSONObject obj = new JSONObject("{\"value\" : 1,\"text\" : \"something\"}");
 	boolean formatOutput = false;
 	// when
-	String actual = StringUtilsHelper.objectToJSON(obj, formatOutput);
+	String actual = JsonUtils.objectToJSON(obj, formatOutput);
 	// then
 	assertEquals("{\"text\":\"something\",\"value\":1}", actual);
     }
@@ -77,7 +31,7 @@ class StringUtilsHelperTest {
 	JSONObject obj = new JSONObject("{\"value\" : 1,\"text\" : \"something\"}");
 	boolean formatOutput = true;
 	// when
-	String actual = StringUtilsHelper.objectToJSON(obj, formatOutput);
+	String actual = JsonUtils.objectToJSON(obj, formatOutput);
 	// then
 	assertEquals("{\n" + "  \"text\": \"something\",\n" + "  \"value\": 1\n" + "}", actual);
     }
@@ -88,7 +42,7 @@ class StringUtilsHelperTest {
 	JSONArray obj = new JSONArray("[{\"value\" : 1,\"text\" : \"something\"}, {\"second\":\"item\"}]");
 	boolean formatOutput = false;
 	// when
-	String actual = StringUtilsHelper.objectToJSON(obj, formatOutput);
+	String actual = JsonUtils.objectToJSON(obj, formatOutput);
 	// then
 	assertEquals("[{\"text\":\"something\",\"value\":1},{\"second\":\"item\"}]", actual);
     }
@@ -99,7 +53,7 @@ class StringUtilsHelperTest {
 	JSONArray obj = new JSONArray("[{\"value\" : 1,\"text\" : \"something\"}, {\"second\":\"item\"}]");
 	boolean formatOutput = true;
 	// when
-	String actual = StringUtilsHelper.objectToJSON(obj, formatOutput);
+	String actual = JsonUtils.objectToJSON(obj, formatOutput);
 	// then
 	assertEquals("[\n" + "  {\n" + "    \"text\": \"something\",\n" + "    \"value\": 1\n" + "  },\n" + "  {"
 		+ "\"second\": \"item\"" + "}\n]", actual);
@@ -111,7 +65,7 @@ class StringUtilsHelperTest {
 	DummyClass obj = getDummyValue();
 	boolean formatOutput = false;
 	// when
-	String actual = StringUtilsHelper.objectToJSON(obj, formatOutput);
+	String actual = JsonUtils.objectToJSON(obj, formatOutput);
 	// then
 	assertEquals("{\"name\":\"test\",\"number\":1}", actual);
     }
@@ -122,7 +76,7 @@ class StringUtilsHelperTest {
 	DummyClass obj = getDummyValue();
 	boolean formatOutput = true;
 	// when
-	String actual = StringUtilsHelper.objectToJSON(obj, formatOutput);
+	String actual = JsonUtils.objectToJSON(obj, formatOutput);
 	// then
 	assertEquals("{\n" + "  \"name\" : \"test\",\n" + "  \"number\" : 1\n" + "}", actual);
     }
@@ -133,7 +87,7 @@ class StringUtilsHelperTest {
 	DummyClass obj = null;
 	boolean formatOutput = false;
 	// when
-	String actual = StringUtilsHelper.objectToJSON(obj, formatOutput);
+	String actual = JsonUtils.objectToJSON(obj, formatOutput);
 	// then
 	assertEquals("{}", actual);
     }
@@ -144,11 +98,35 @@ class StringUtilsHelperTest {
 	Object obj = new Object();
 	boolean formatOutput = true;
 	// when
-	String actual = StringUtilsHelper.objectToJSON(obj, formatOutput);
+	String actual = JsonUtils.objectToJSON(obj, formatOutput);
 	// then
 	assertEquals(
 		"JSON serialization failuire: No serializer found for class java.lang.Object and no properties discovered to create BeanSerializer (to avoid exception, disable SerializationFeature.FAIL_ON_EMPTY_BEANS)",
 		actual);
+    }
+
+    @Test
+    void testObjectFromJSON_null() throws IOException {
+	// given
+	String json = null;
+	Class<DummyClass> clazz = DummyClass.class;
+	// when
+	Object actual = JsonUtils.objectFromJSON(json, clazz);
+	// then
+	assertNull(actual);
+    }
+
+    @Test
+    void testObjectFromJSON_() throws IOException {
+	// given
+	String json = "{\"name\":\"test\",\"number\":1}";
+	Class<DummyClass> clazz = DummyClass.class;
+	// when
+	DummyClass actual = JsonUtils.objectFromJSON(json, clazz);
+	// then
+	assertNotNull(actual);
+	assertEquals("test", actual.getName());
+	assertEquals(1, actual.getNumber().intValue());
     }
 
     protected DummyClass getDummyValue() {
