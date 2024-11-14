@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -95,6 +96,7 @@ class WorkoutServiceTest {
 	// when
 	Workout actual = workoutService.saveWorkout(workout);
 	// then
+	verify(kafkaProducer).sendMessage(anyString());
 	verify(workoutRepo).save(workout);
 	assertNotNull(actual);
 	assertEquals(workout, actual);
@@ -111,6 +113,8 @@ class WorkoutServiceTest {
 	Workout actual = workoutService.updateWorkout(workout);
 	// then
 	verify(workoutRepo).findOneByWorkoutId(id);
+	verify(kafkaProducer).sendMessage(
+		"{\"workoutId\":\"test\",\"userId\":null,\"exercises\":null,\"workoutTemplate\":null,\"dateCreated\":[2024,11,14],\"errorsAndWarnings\":null,\"status\":null}");
 	verify(workoutRepo).save(workout);
 	assertNotNull(actual);
 	assertEquals(workout, actual);

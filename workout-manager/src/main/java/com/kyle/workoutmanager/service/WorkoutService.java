@@ -35,15 +35,14 @@ public class WorkoutService {
 	workout.setWorkoutId(StringUtilsHelper.generateUuid(12));
 	workout.setDateCreated(LocalDate.now());
 	workout.setStatus(Status.ACTIVE);
+	kafkaProducer.sendMessage(StringUtilsHelper.objectToJSON(workout, false));
 	return workoutRepository.save(workout);
     }
 
     public Workout updateWorkout(Workout workout) {
 	Optional<Workout> existing = workoutRepository.findOneByWorkoutId(workout.getWorkoutId());
 	if (existing.isPresent()) {
-	    // produce to csv-manager
-
-	    kafkaProducer.sendMessage("test");
+	    kafkaProducer.sendMessage(StringUtilsHelper.objectToJSON(workout, false));
 	    return workoutRepository.save(workout);
 	} else {
 	    throw new WorkoutCrudException("Workout with id: " + workout.getWorkoutId() + " does not exist!");
