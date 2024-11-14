@@ -10,6 +10,7 @@ import com.kyle.commonutils.StringUtilsHelper;
 import com.kyle.workoutmanager.enums.Status;
 import com.kyle.workoutmanager.exceptions.WorkoutCrudException;
 import com.kyle.workoutmanager.model.Workout;
+import com.kyle.workoutmanager.producer.KafkaProducer;
 import com.kyle.workoutmanager.repository.WorkoutRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 public class WorkoutService {
 
     private final WorkoutRepository workoutRepository;
+
+    private final KafkaProducer kafkaProducer;
 
     public List<Workout> getAllWorkouts() {
 	return workoutRepository.findAll();
@@ -39,8 +42,9 @@ public class WorkoutService {
 	Optional<Workout> existing = workoutRepository.findOneByWorkoutId(workout.getWorkoutId());
 	if (existing.isPresent()) {
 	    // produce to csv-manager
-	    Workout existingWorkout = existing.get();
-	    return workoutRepository.save(existingWorkout);
+
+	    kafkaProducer.sendMessage("test");
+	    return workoutRepository.save(workout);
 	} else {
 	    throw new WorkoutCrudException("Workout with id: " + workout.getWorkoutId() + " does not exist!");
 	}
@@ -56,4 +60,5 @@ public class WorkoutService {
 	    throw new WorkoutCrudException("Workout with id: " + workoutId + " does not exist!");
 	}
     }
+
 }

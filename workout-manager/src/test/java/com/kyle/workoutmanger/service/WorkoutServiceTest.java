@@ -23,6 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import com.kyle.workoutmanager.enums.Status;
 import com.kyle.workoutmanager.exceptions.WorkoutCrudException;
 import com.kyle.workoutmanager.model.Workout;
+import com.kyle.workoutmanager.producer.KafkaProducer;
 import com.kyle.workoutmanager.repository.WorkoutRepository;
 import com.kyle.workoutmanager.service.WorkoutService;
 import com.kyle.workoutmanager.testhelper.TestHelper;
@@ -34,6 +35,9 @@ class WorkoutServiceTest {
 
     @Autowired
     WorkoutService workoutService;
+
+    @MockBean
+    KafkaProducer kafkaProducer;
 
     @MockBean
     WorkoutRepository workoutRepo;
