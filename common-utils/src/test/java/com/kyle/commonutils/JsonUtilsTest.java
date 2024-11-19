@@ -1,10 +1,12 @@
 package com.kyle.commonutils;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -127,6 +129,40 @@ class JsonUtilsTest {
 	assertNotNull(actual);
 	assertEquals("test", actual.getName());
 	assertEquals(1, actual.getNumber().intValue());
+    }
+
+    @Test
+    void testObjectListFromJSON_null() throws Exception {
+	// given
+	String json = null;
+	Class<DummyClass> clazz = DummyClass.class;
+	// when
+	List<DummyClass> actual = JsonUtils.objectListFromJSON(json, clazz);
+	// then
+	assertArrayEquals(new Object[] {}, actual.toArray());
+    }
+
+    @Test
+    void testObjectListFromJSON_empty() throws Exception {
+	// given
+	String json = "[]";
+	Class<DummyClass> clazz = DummyClass.class;
+	// when
+	List<DummyClass> actual = JsonUtils.objectListFromJSON(json, clazz);
+	// then
+	assertArrayEquals(new Object[] {}, actual.toArray());
+    }
+
+    @Test
+    void testObjectListFromJSON_single() throws Exception {
+	// given
+	String json = "[{\"name\":\"test\",\"number\":1}]";
+	Class<DummyClass> clazz = DummyClass.class;
+	// when
+	List<DummyClass> actual = JsonUtils.objectListFromJSON(json, clazz);
+	// then
+	assertEquals("test", actual.get(0).getName());
+	assertEquals(1, actual.get(0).getNumber());
     }
 
     protected DummyClass getDummyValue() {

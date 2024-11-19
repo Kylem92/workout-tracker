@@ -1,6 +1,8 @@
 package com.kyle.commonutils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -48,5 +50,17 @@ public class JsonUtils {
 
     public static <T> T objectFromJSON(String json, Class<T> clazz) throws IOException {
 	return StringUtils.isBlank(json) ? null : mapper.readValue(json, clazz);
+    }
+
+    public static <T> List<T> objectListFromJSON(String json, Class<T> clazz) throws IOException, JSONException {
+	List<T> ret = new ArrayList<>();
+	if (StringUtils.isNotBlank(json)) {
+	    JSONArray array = new JSONArray(json);
+	    int len = array.length();
+	    for (int idx = 0; idx < len; idx++) {
+		ret.add(mapper.readValue(array.get(idx).toString(), clazz));
+	    }
+	}
+	return ret;
     }
 }
