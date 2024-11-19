@@ -1,0 +1,31 @@
+server:
+ port: 3004
+info:
+ app:
+  name: Csv Manager
+  description: Service to manage workout csv
+  maintained-by: kyle
+    
+---
+
+spring:
+ config:
+  activate:
+   on-profile: local
+ data:
+  mongodb:
+   uri: mongodb://localhost:27017/gymdb
+ kafka:
+  bootstrap-servers: kafka:9092 
+  
+---
+
+spring:
+ config:
+  activate:
+   on-profile: test
+ data:
+  mongodb:
+   uri: mongodb://localhost:27017/gymdb
+ kafka:
+  bootstrap-servers: kafka:9092
