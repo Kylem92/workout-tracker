@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.kyle.commonutils.JsonUtils;
 import com.kyle.workoutmanager.exceptions.WorkoutCrudException;
 import com.kyle.workoutmanager.model.Workout;
 import com.kyle.workoutmanager.service.WorkoutService;
@@ -162,49 +163,33 @@ class WorkoutControllerTests {
     @Test
     void testCreateWorkout_MVC_post() throws Exception {
 	// given
-	Workout workout = TestHelper.createWorkout("workoutId");
-	when(workoutService.saveWorkout(workout)).thenReturn(workout);
+	List<Workout> workouts = TestHelper.createWorkouts(3);
+	when(workoutService.saveWorkouts(workouts)).thenReturn(workouts);
 	// when
-	MvcResult actual = mockMvc.perform(post("/workout/create").content(mapper.writeValueAsString(workout))
+	MvcResult actual = mockMvc.perform(post("/workout/create").content(mapper.writeValueAsString(workouts))
 		.contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk()).andReturn();
 	// then
 	String contentAsString = actual.getResponse().getContentAsString();
-	Workout actualWorkout = mapper.readValue(contentAsString, Workout.class);
-	assertEquals(workout, actualWorkout);
-	verify(workoutService).saveWorkout(workout);
+	List<Workout> actualWorkouts = JsonUtils.objectListFromJSON(contentAsString, Workout.class);
+	assertEquals(workouts, actualWorkouts);
+	verify(workoutService).saveWorkouts(workouts);
 
-    }
-
-    @Test
-    void testCreateWorkout_MVC_post_workoutname_already_exists() throws Exception {
-	// given
-	Workout workout = TestHelper.createWorkout("workoutId");
-	when(workoutService.saveWorkout(workout))
-		.thenThrow(new WorkoutCrudException("TEST_EXCEPTION", HttpStatus.FORBIDDEN));
-	// when
-	MvcResult actual = mockMvc.perform(post("/workout/create").content(mapper.writeValueAsString(workout))
-		.contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isForbidden()).andReturn();
-	// then
-	String contentAsString = actual.getResponse().getContentAsString();
-	Workout actualWorkout = mapper.readValue(contentAsString, Workout.class);
-	assertEquals("TEST_EXCEPTION", actualWorkout.getErrorsAndWarnings().get(0));
-	verify(workoutService).saveWorkout(any());
     }
 
     @Test
     void testCreateWorkout_MVC_post_failure() throws Exception {
 	// given
-	Workout workout = TestHelper.createWorkout("workoutId");
-	when(workoutService.saveWorkout(workout)).thenThrow(new RuntimeException("TEST_EXCEPTION"));
+	List<Workout> workouts = TestHelper.createWorkouts(3);
+	when(workoutService.saveWorkouts(workouts)).thenThrow(new RuntimeException("TEST_EXCEPTION"));
 	// when
 	MvcResult actual = mockMvc
-		.perform(post("/workout/create").content(mapper.writeValueAsString(workout))
+		.perform(post("/workout/create").content(mapper.writeValueAsString(workouts))
 			.contentType(MediaType.APPLICATION_JSON_VALUE))
 		.andExpect(status().isInternalServerError()).andReturn();
 	// then
 	String contentAsString = actual.getResponse().getContentAsString();
 	assertThat(contentAsString).isBlank();
-	verify(workoutService).saveWorkout(workout);
+	verify(workoutService).saveWorkouts(workouts);
     }
 
     @Test

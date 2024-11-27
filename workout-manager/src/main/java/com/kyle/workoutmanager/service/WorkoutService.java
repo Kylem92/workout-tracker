@@ -32,12 +32,15 @@ public class WorkoutService {
 	return workoutRepository.findOneByWorkoutId(id);
     }
 
-    public Workout saveWorkout(Workout workout) {
-	workout.setWorkoutId(CustomStringUtils.generateUuid(12));
-	workout.setDateCreated(LocalDate.now());
-	workout.setStatus(Status.ACTIVE);
-	kafkaProducer.sendMessage(JsonUtils.objectToJSON(workout, false));
-	return workoutRepository.save(workout);
+    public List<Workout> saveWorkouts(List<Workout> workouts) {
+	for (Workout workout : workouts) {
+	    workout.setWorkoutId(CustomStringUtils.generateUuid(12));
+	    workout.setDateCreated(LocalDate.now());
+	    workout.setStatus(Status.ACTIVE);
+	    workoutRepository.save(workout);
+	}
+	kafkaProducer.sendMessage(JsonUtils.objectToJSON(workouts, false));
+	return workouts;
     }
 
     public Workout updateWorkout(Workout workout) {

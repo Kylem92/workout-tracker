@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/workout")
 @RequiredArgsConstructor
 public class WorkoutController {
+
+    public static final String X_USER_ID_HEADER_KEY = "x-userid-id";
 
     private final WorkoutService workoutService;
 
@@ -53,14 +56,13 @@ public class WorkoutController {
     }
 
     @PostMapping(value = "/create", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Workout> saveWorkout(@RequestBody Workout workout) {
+    public ResponseEntity<List<Workout>> saveWorkout(
+	    @RequestHeader(value = X_USER_ID_HEADER_KEY, required = false) String userId,
+	    @RequestBody List<Workout> workouts) {
 	try {
-	    log.info("Creating workout with userId: {}", workout.getUserId());
-	    return ResponseHelper.getResponseEntityOK(workoutService.saveWorkout(workout));
-	} catch (WorkoutCrudException e) {
-	    log.error(e.getMessage());
-	    workout.setErrorsAndWarnings(Arrays.asList(e.getMessage()));
-	    return ResponseHelper.getResponseEntityWithError(workout, HttpStatus.FORBIDDEN);
+	    log.info("Creating workout with userId: {}", userId);
+	    workoutService.saveWorkouts(workouts);
+	    return ResponseHelper.getResponseEntityOK(workouts);
 	} catch (Exception e) {
 	    log.error(e.getMessage());
 	    return ResponseHelper.getResponseEntityWithError(HttpStatus.INTERNAL_SERVER_ERROR);

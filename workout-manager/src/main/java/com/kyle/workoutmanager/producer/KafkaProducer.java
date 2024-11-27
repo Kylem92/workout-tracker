@@ -25,7 +25,7 @@ public class KafkaProducer {
 	    if (ex == null) {
 		log.info("Sent message=[" + msg + "] with offset=[" + result.getRecordMetadata().offset() + "]");
 	    } else {
-		log.info("Unable to send message=[" + msg + "] due to : " + ex.getMessage());
+		log.error("Unable to send message=[" + msg + "] due to : " + ex.getMessage());
 	    }
 	});
     }

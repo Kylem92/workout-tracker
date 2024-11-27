@@ -12,8 +12,9 @@ public class Workout {
 
     private String workoutId;
     private String userId;
+    private int dayNumber;
+    private int weekNumber;
     private List<Exercise> exercises;
-    private WorkoutTemplate workoutTemplate;
     private LocalDate dateCreated;
     private List<String> errorsAndWarnings;
     private Status status;

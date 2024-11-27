@@ -10,6 +10,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,14 +94,16 @@ class WorkoutServiceTest {
     void testSaveworkout() {
 	// given
 	Workout workout = TestHelper.createWorkout("test");
+	List<Workout> workouts = Arrays.asList(workout);
+
 	when(workoutRepo.save(workout)).thenReturn(workout);
 	// when
-	Workout actual = workoutService.saveWorkout(workout);
+	List<Workout> actual = workoutService.saveWorkouts(workouts);
 	// then
 	verify(kafkaProducer).sendMessage(anyString());
 	verify(workoutRepo).save(workout);
 	assertNotNull(actual);
-	assertEquals(workout, actual);
+	assertEquals(workouts, actual);
     }
 
     @Test
@@ -107,6 +111,7 @@ class WorkoutServiceTest {
 	// given
 	String id = "test";
 	Workout workout = TestHelper.createWorkout("test");
+	workout.setDateCreated(LocalDate.parse("2007-12-03"));
 	when(workoutRepo.findOneByWorkoutId(id)).thenReturn(Optional.of(workout));
 	when(workoutRepo.save(workout)).thenReturn(workout);
 	// when
@@ -114,7 +119,7 @@ class WorkoutServiceTest {
 	// then
 	verify(workoutRepo).findOneByWorkoutId(id);
 	verify(kafkaProducer).sendMessage(
-		"{\"workoutId\":\"test\",\"userId\":null,\"exercises\":null,\"workoutTemplate\":null,\"dateCreated\":[2024,11,14],\"errorsAndWarnings\":null,\"status\":null}");
+		"{\"workoutId\":\"test\",\"userId\":null,\"dayNumber\":0,\"weekNumber\":0,\"exercises\":null,\"dateCreated\":[2007,12,3],\"errorsAndWarnings\":null,\"status\":null}");
 	verify(workoutRepo).save(workout);
 	assertNotNull(actual);
 	assertEquals(workout, actual);
