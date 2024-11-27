@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.kyle.commonutils.StringUtilsHelper;
+import com.kyle.commonutils.CustomStringUtils;
 import com.kyle.user.enums.Status;
 import com.kyle.user.exceptions.UserCrudException;
 import com.kyle.user.model.User;
@@ -39,9 +39,9 @@ public class UserService {
     public User saveUser(User user) {
 	Optional<User> existing = userRepo.findOneByUsername(user.getUsername());
 	if (existing.isEmpty()) {
-	    user.setUserId(StringUtilsHelper.generateUuid(12));
+	    user.setUserId(CustomStringUtils.generateUuid(12));
 	    user.setDateCreated(LocalDate.now());
-	    user.setPassword(StringUtilsHelper.hashValueIfNeeded(user.getPassword()));
+	    user.setPassword(CustomStringUtils.hashValueIfNeeded(user.getPassword()));
 	    user.setStatus(Status.ACTIVE);
 	    return userRepo.save(user);
 	} else {
