@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.kyle.commonutils.StringUtilsHelper;
+import com.kyle.commonutils.CustomStringUtils;
 import com.kyle.exercise.enums.Status;
 import com.kyle.exercise.exceptions.ExerciseCrudException;
 import com.kyle.exercise.model.Exercise;
@@ -39,7 +39,7 @@ public class ExerciseService {
     public Exercise saveExercise(Exercise exercise) {
 	Optional<Exercise> existing = exerciseRepo.findOneByName(exercise.getName());
 	if (existing.isEmpty()) {
-	    exercise.setExerciseId(StringUtilsHelper.generateUuid(12));
+	    exercise.setExerciseId(CustomStringUtils.generateUuid(12));
 	    exercise.setDateCreated(LocalDate.now());
 	    exercise.setStatus(Status.ACTIVE);
 	    return exerciseRepo.save(exercise);
