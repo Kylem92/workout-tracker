@@ -20,8 +20,7 @@ public class Exercise {
 
     public List<String> toCsvList() {
 	return Arrays.asList(name, String.valueOf(sets), String.valueOf(reps), intensity,
-		load == 0 ? "" : String.valueOf(load), // Only show load if it's not 0
-		tempo, String.valueOf(rest));
+		load == 0 ? "" : String.valueOf(load), tempo, String.valueOf(rest));
     }
 
 }

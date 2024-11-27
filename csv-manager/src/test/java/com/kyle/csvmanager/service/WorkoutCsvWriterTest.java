@@ -9,11 +9,11 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,7 +38,7 @@ class WorkoutCsvWriterTest {
     private Workout mockWorkout;
 
     @Test
-    void testWriteWorkoutData_SingleWorkout(@TempDir Path tempDir) throws IOException {
+    void testWriteWorkoutData_SingleWorkout() throws IOException {
 	// given
 
 	List<Workout> workouts = new ArrayList<>();
@@ -54,8 +54,8 @@ class WorkoutCsvWriterTest {
 	workoutCsvWriter.writeWorkoutData(workouts);
 
 	// then
-	assertTrue(Files.exists(Path.of("workout-program.csv")));
-	List<String> lines = Files.readAllLines(Path.of("workout-program.csv"));
+	assertTrue(Files.exists(Path.of("user1-" + LocalDate.now() + ".csv")));
+	List<String> lines = Files.readAllLines(Path.of("user1-" + LocalDate.now() + ".csv"));
 
 	assertNotNull(lines);
 	assertTrue(lines.size() > 0);
@@ -90,8 +90,8 @@ class WorkoutCsvWriterTest {
 	workoutCsvWriter.writeWorkoutData(workouts);
 
 	// then
-	assertTrue(Files.exists(Path.of("workout-program.csv")));
-	List<String> lines = Files.readAllLines(Path.of("workout-program.csv"));
+	assertTrue(Files.exists(Path.of("user1-" + LocalDate.now() + ".csv")));
+	List<String> lines = Files.readAllLines(Path.of("user1-" + LocalDate.now() + ".csv"));
 
 	assertNotNull(lines);
 	assertTrue(lines.size() > 0);

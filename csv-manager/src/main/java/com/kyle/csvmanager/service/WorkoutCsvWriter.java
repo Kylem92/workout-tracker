@@ -2,10 +2,13 @@ package com.kyle.csvmanager.service;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvListWriter;
 import org.supercsv.prefs.CsvPreference;
@@ -20,7 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkoutCsvWriter {
 
     public void writeWorkoutData(List<Workout> workoutDays) throws IOException {
-	try (CsvListWriter csvWriter = new CsvListWriter(new FileWriter("workout-program.csv"),
+	if (workoutDays.isEmpty()) {
+	    return;
+	}
+	try (CsvListWriter csvWriter = new CsvListWriter(new FileWriter(filenameFromUserIdAndDate(workoutDays)),
 		CsvPreference.STANDARD_PREFERENCE)) {
 
 	    workoutDays.sort(Comparator.comparing(Workout::getWeekNumber).thenComparing(Workout::getDayNumber));
@@ -40,8 +46,16 @@ public class WorkoutCsvWriter {
 	}
     }
 
+    private String filenameFromUserIdAndDate(List<Workout> workoutDays) {
+	return Optional.ofNullable(workoutDays).filter(list -> !list.isEmpty())
+		.flatMap(list -> list.stream().filter(workoutDay -> StringUtils.isNotBlank(workoutDay.getUserId()))
+			.findFirst().map(workoutDay -> workoutDay.getUserId() + "-" + LocalDate.now() + ".csv"))
+		.orElse("");
+    }
+
     private static void writeExerciseData(CsvListWriter csvWriter, Workout workoutDay) throws IOException {
-	csvWriter.write(Arrays.asList("Day " + workoutDay.getDayNumber()));
+	csvWriter.write(Arrays.asList("Day " + workoutDay.getDayNumber()
+		+ (workoutDay.getDateCreated() == null ? "" : " " + workoutDay.getDateCreated())));
 	csvWriter.writeHeader("");
 	csvWriter.write(Arrays.asList("Exercise", "Sets", "Reps", "Intensity", "Load", "Tempo", "Rest"));
 	List<Exercise> exercises = workoutDay.getExercises();
@@ -51,5 +65,7 @@ public class WorkoutCsvWriter {
 
 	csvWriter.writeHeader("");
     }
+
+    // workoutDays.stream().filter(w -> StringUtils.isNotBlank(w.getUserId()));
 
 }

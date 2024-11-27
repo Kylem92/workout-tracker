@@ -21,12 +21,11 @@ public class KafkaConsumer {
 
     @KafkaListener(topics = "workoutmanagercsv", groupId = "csv_manager")
     public void listenWorkoutManager(String message) {
-	log.info("Received Message in group csv_manager: " + message);
+	log.info("Received Message in group csv_manager: {}", message);
 	try {
 	    workoutCsvWriter.writeWorkoutData(JsonUtils.objectListFromJSON(message, Workout.class));
 	} catch (IOException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
+	    log.info("Error writing workout data [{}] to csv with error message: {}", message, e.getMessage());
 	}
     }
 

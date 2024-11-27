@@ -2,6 +2,8 @@ package com.kyle.csvmanager.service;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,7 @@ public class WorkoutCsvParser {
 		} else if (line[0] != null && line[0].startsWith("Day")) {
 		    currentDay = Integer.parseInt(line[0].split(" ")[1]);
 		    currentWorkoutDay = new Workout(currentWeek, currentDay);
+		    currentWorkoutDay.setDateCreated(parseDateIfPresent(line[0]));
 		    workoutDays.add(currentWorkoutDay);
 		    beanReader.getHeader(false);
 		} else if (line[0] != null && !line[0].isEmpty() && currentWorkoutDay != null) {
@@ -52,6 +55,15 @@ public class WorkoutCsvParser {
 	}
 
 	return workoutDays;
+    }
+
+    private LocalDate parseDateIfPresent(String value) {
+	try {
+	    return value == null || value.trim().isEmpty() ? null : LocalDate.parse(value.split(" ")[2]);
+	} catch (DateTimeParseException e) {
+	    return null;
+	}
+
     }
 
     private int parseIntOrDefault(String value, int defaultValue) {

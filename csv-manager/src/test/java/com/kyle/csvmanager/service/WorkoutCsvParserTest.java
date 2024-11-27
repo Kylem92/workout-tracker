@@ -37,9 +37,10 @@ class WorkoutCsvParserTest {
     @Test
     void parseWorkoutFile_ValidContent_ShouldParseCorrectly() throws IOException {
 	// given
-	String csvContent = "Week 1\n" + "Day 1\n" + "Exercise,Sets,Reps,Intensity,Load,Tempo,Rest\n"
+	String csvContent = "Week 1\n" + "Day 1 2007-01-02\n" + "Exercise,Sets,Reps,Intensity,Load,Tempo,Rest\n"
 		+ "Squat,3,5,High,100.5,2-0-1,90\n" + "Bench Press,3,5,Medium,80.0,2-1-1,60\n" + "\n" + "Week 1\n"
-		+ "Day 2\n" + "Exercise,Sets,Reps,Intensity,Load,Tempo,Rest\n" + "Deadlift,4,3,High,120.5,2-1-1,120\n";
+		+ "Day 2 2007-01-03\n" + "Exercise,Sets,Reps,Intensity,Load,Tempo,Rest\n"
+		+ "Deadlift,4,3,High,120.5,2-1-1,120\n";
 
 	// Mock the file input stream
 	InputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
@@ -87,7 +88,7 @@ class WorkoutCsvParserTest {
     @Test
     void parseWorkoutFile_InvalidNumbers_ShouldUseDefaultValues() throws IOException {
 	// given
-	String csvContent = "Week 1\n" + "Day 1\n" + "Exercise,Sets,Reps,Intensity,Load,Tempo,Rest\n"
+	String csvContent = "Week 1\n" + "Day 1 2007-01-02\n" + "Exercise,Sets,Reps,Intensity,Load,Tempo,Rest\n"
 		+ "Squat,invalid,abc,High,invalid,2-0-1,xyz\n";
 
 	InputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
@@ -110,7 +111,8 @@ class WorkoutCsvParserTest {
     @Test
     void parseWorkoutFile_MissingValues_ShouldUseDefaultValues() throws IOException {
 	// given
-	String csvContent = "Week 1\n" + "Day 1\n" + "Exercise,Sets,Reps,Intensity,Load,Tempo,Rest\n" + "Squat,,,,,,\n";
+	String csvContent = "Week 1\n" + "Day 1 2007-01-02\n" + "Exercise,Sets,Reps,Intensity,Load,Tempo,Rest\n"
+		+ "Squat,,,,,,\n";
 
 	InputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
 	when(mockFile.getInputStream()).thenReturn(inputStream);
