@@ -35,7 +35,7 @@ class JsonUtilsTest {
 	// when
 	String actual = JsonUtils.objectToJSON(obj, formatOutput);
 	// then
-	assertEquals("{\n" + "  \"text\": \"something\",\n" + "  \"value\": 1\n" + "}", actual);
+	assertEquals("{text\": \"something\",\n" + "  \"value\": 1\n" + "}", actual);
     }
 
     @Test
